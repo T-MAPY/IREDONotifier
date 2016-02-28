@@ -62,7 +62,7 @@
             <TextBox  Grid.Row="1" Grid.Column="1" Height="25" Text="{Binding NotificationText, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="10,0,10,10" VerticalContentAlignment="Center"/>
 
         </Grid>
-        <Button Grid.Row="2" Content="Odeslat" Width="100" Height="25" Margin="10,0,10,10" HorizontalAlignment="Right" Command="{Binding SendCmd}"/>
+        <Button Grid.Row="2" Content="Odeslat" Width="100" Height="25" Margin="10,0,10,10" HorizontalAlignment="Right" Command="{Binding SendCmd}" IsDefault="True" />
         
     </Grid>
 </Window>
