@@ -29,6 +29,9 @@
                         AlternatingRowBackground="WhiteSmoke" AlternationCount="2"
                         HorizontalScrollBarVisibility="Auto"
                         VerticalScrollBarVisibility="Visible" Margin="10">
+            <DataGrid.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="LightGray"/>
+            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="1*" Binding="{Binding Name}" IsReadOnly="True">
                     <DataGridTextColumn.Header>
