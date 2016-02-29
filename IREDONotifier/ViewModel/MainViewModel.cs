@@ -78,14 +78,14 @@ namespace IREDONotifier.ViewModel
                 MessageBox.Show(result, $"Zpráva do tématu '{TopicText}' odeslána s výsledkem:");
             }
             else
-                foreach (var user in Users)
+                foreach (var user in GridSelectedUsers)
                 {
-                    var json = "{ \"data\": { \"message\": \"" + NotificationText + "\" }, \"to\" : \"" + user.RegId + "\"}";
+                    var json = "{ \"data\": { \"message\": \"" + NotificationText + "\" }, \"to\" : \"" + ((User)user).RegId + "\"}";
 
                     var result = SendMessage(json);
 
-                    Logger.Debug($"Zpráva pro '{user.Email}' odeslána s výsledkem: " + result);
-                    MessageBox.Show(result, $"Zpráva pro '{user.Email}' odeslána s výsledkem:");
+                    Logger.Debug($"Zpráva pro '{((User)user).Email}' odeslána s výsledkem: " + result);
+                    MessageBox.Show(result, $"Zpráva pro '{((User)user).Email}' odeslána s výsledkem:");
                 }
             NotificationText = "";
             TopicText = "";
