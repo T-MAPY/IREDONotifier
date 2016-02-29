@@ -11,7 +11,7 @@ using System.Configuration;
 
 namespace IREDONotifier.Database
 {
-    public class MySqlLoader
+    public class MySqlConnector
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -66,6 +66,29 @@ namespace IREDONotifier.Database
                 Logger.Fatal(e);
             }
             return users;            
+        }
+
+        public void DeleteUser(string regId)
+        {
+            try
+            {
+                using (var conn = new MySqlConnection($"server='{Convert.ToString((ConfigurationManager.AppSettings["DB_HOST"]))}';user='{Convert.ToString((ConfigurationManager.AppSettings["DB_USER"]))}';database='{Convert.ToString((ConfigurationManager.AppSettings["DB_DATABASE"]))}';port=3306;password='{Convert.ToString((ConfigurationManager.AppSettings["DB_PASSWORD"]))}';"))
+                {
+                    Logger.Debug("Deleting user " + regId);
+                    conn.Open();
+                    using (var command = new MySqlCommand("DELETE FROM gcm_users WHERE gcm_regid = @regId;", conn))
+                    {
+                        command.Parameters.AddWithValue("@regId", regId);
+                        command.ExecuteScalar();
+                        Logger.Debug("User deleted");
+                    }
+                    conn.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Fatal(e);
+            }
         }
     }
 }

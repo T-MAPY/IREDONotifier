@@ -16,12 +16,16 @@ using IREDONotifier.Database;
 using IREDONotifier.Model;
 using NLog;
 using System.Configuration;
+using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace IREDONotifier.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        private MySqlConnector dbConnector;
 
         private ObservableCollection<User> _users = new ObservableCollection<User>();
         public ObservableCollection<User> Users
@@ -57,8 +61,8 @@ namespace IREDONotifier.ViewModel
         {
             SendCmd = new SendCmd(this);
 
-            var loader = new MySqlLoader();
-            Users = loader.GetAllUsers();
+            dbConnector = new MySqlConnector();
+            Users = dbConnector.GetAllUsers();
         }
 
         internal bool CanSend()
@@ -68,24 +72,44 @@ namespace IREDONotifier.ViewModel
 
         internal void Send()
         {
+            var jsonObject = new GcmOutgoingMessage
+            {
+                data = new GcmOutgoingMessage.Data() { message = NotificationText }
+            };
+
             if (!string.IsNullOrWhiteSpace(TopicText))
             {
-                var json = "{ \"data\": { \"message\": \"" + NotificationText + "\" }, \"to\" : \"/topics/" + TopicText + "\"}";
+                jsonObject.to = "/topics/" + TopicText;
 
-                var result = SendMessage(json);
+                var result = SendMessage(JsonConvert.SerializeObject(jsonObject));
 
                 Logger.Debug($"Zpráva do tématu '{TopicText}' odeslána s výsledkem: " + result);
-                MessageBox.Show(result, $"Zpráva do tématu '{TopicText}' odeslána s výsledkem:");
+                MessageBox.Show($"Zpráva '{NotificationText}' do tématu '{TopicText}' úspěšně odeslána", "Zpráva odeslána", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
                 foreach (var user in GridSelectedUsers)
                 {
-                    var json = "{ \"data\": { \"message\": \"" + NotificationText + "\" }, \"to\" : \"" + ((User)user).RegId + "\"}";
+                    jsonObject.to = ((User)user).RegId;
 
-                    var result = SendMessage(json);
+                    var result = SendMessage(JsonConvert.SerializeObject(jsonObject));
 
-                    Logger.Debug($"Zpráva pro '{((User)user).Email}' odeslána s výsledkem: " + result);
-                    MessageBox.Show(result, $"Zpráva pro '{((User)user).Email}' odeslána s výsledkem:");
+                    var resultObj = JsonConvert.DeserializeObject<GcmResponse>(result);
+
+                    if (resultObj != null && resultObj.success > 0)
+                    {
+                        Logger.Debug($"Zpráva '{NotificationText}' pro '{((User)user).Email}' úspěšně odeslána");
+                        MessageBox.Show($"Zpráva '{NotificationText}' pro '{((User)user).Email}' úspěšně odeslána", "Zpráva odeslána", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        Logger.Debug($"Zpráva '{NotificationText}' pro '{((User)user).Email}' odeslána s výsledkem " + result);
+                        var msgResult = MessageBox.Show($"Zprávu pro '{((User)user).Email}' se nepodařilo odeslat:" + System.Environment.NewLine + result + System.Environment.NewLine + "Smazat toto zařízení z evidence?", "Problém při odesílání", MessageBoxButton.YesNo, MessageBoxImage.Error);
+                        if (msgResult == MessageBoxResult.Yes)
+                        {
+                            dbConnector.DeleteUser(((User)user).RegId);
+                            Users = dbConnector.GetAllUsers();
+                        }
+                    }
                 }
             NotificationText = "";
             TopicText = "";
