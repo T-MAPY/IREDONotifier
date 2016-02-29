@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         DataContext="{StaticResource MainViewModel}"
-        Title="IREDO Notifier" Height="350" Width="480">
+        Title="IREDO Notifier" Height="350" Width="700">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
