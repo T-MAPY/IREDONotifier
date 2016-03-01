@@ -84,9 +84,11 @@ namespace IREDONotifier.ViewModel
                 var result = SendMessage(JsonConvert.SerializeObject(jsonObject));
 
                 Logger.Debug($"Zpráva do tématu '{TopicText}' odeslána s výsledkem: " + result);
-                MessageBox.Show($"Zpráva '{NotificationText}' do tématu '{TopicText}' úspěšně odeslána", "Zpráva odeslána", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show($"Zpráva '{NotificationText}' do tématu '{TopicText}' úspěšně odeslána",
+                    "Zpráva odeslána", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
+            {                
                 foreach (var user in GridSelectedUsers)
                 {
                     jsonObject.to = ((User)user).RegId;
@@ -107,10 +109,11 @@ namespace IREDONotifier.ViewModel
                         if (msgResult == MessageBoxResult.Yes)
                         {
                             dbConnector.DeleteUser(((User)user).RegId);
-                            Users = dbConnector.GetAllUsers();
                         }
                     }
-                }
+                }                
+            }
+            Users = dbConnector.GetAllUsers(); //znovu načtení pro případ, že jsme promazávali uživatele (nemohu to udělat v rámci iterace - změnila by se mi kolekce)
             NotificationText = "";
             TopicText = "";
         }
